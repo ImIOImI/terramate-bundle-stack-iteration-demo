@@ -1,0 +1,25 @@
+# DESIRED FORM #1 — data-driven iteration on the stack block itself.
+#
+# Rename to `desired.tm.hcl` and run `terramate generate` to reproduce:
+#   terramate schema error: unrecognized "define.bundle.stack" attribute
+#   "for_each" — valid attributes are [condition]
+#
+# This single block should replace the 3 near-identical condition-gated blocks
+# in bundle.tm.hcl, and — unlike them — impose no cap on the pool count.
+
+define "bundle" {
+  input "node_pools" {
+    type = map(any)
+  }
+
+  define bundle stack "node-pool" {
+    for_each = bundle.input.node_pools.value   # <-- rejected today
+
+    metadata {
+      # each.key / each.value would name and configure the per-pool stack.
+      name = "node-pool-${each.key}"
+      path = "node-pools/${each.key}"
+      tags = ["node-pool", each.key]
+    }
+  }
+}

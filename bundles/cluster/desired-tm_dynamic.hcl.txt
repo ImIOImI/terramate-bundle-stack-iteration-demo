@@ -1,0 +1,25 @@
+# DESIRED FORM #2 — the `tm_dynamic` idiom, mirroring generate_hcl.
+#
+# Rename to `desired.tm.hcl` and run `terramate generate` to reproduce:
+#   terramate schema error: unexpected block type "tm_dynamic"
+#
+# Terramate already has `tm_dynamic` for generating repeated blocks inside
+# generate_hcl. Extending the same construct to synthesize `define bundle
+# stack` blocks would be a natural, already-familiar spelling.
+
+define "bundle" {
+  input "node_pools" {
+    type = map(any)
+  }
+
+  tm_dynamic "stack" {                         # <-- rejected today
+    for_each = bundle.input.node_pools.value
+    labels   = ["node-pool-${each.key}"]
+    content {
+      metadata {
+        name = "node-pool-${each.key}"
+        tags = ["node-pool", each.key]
+      }
+    }
+  }
+}
